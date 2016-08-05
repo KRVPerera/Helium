@@ -35,21 +35,21 @@ struct returnParse_t {
   uint64 *locateOriginals;
 };
 
-//get the number of basic blocks - disparity due to 65535 
+//get the number of basic blocks - disparity due to 65535
 void checkStructure(returnParse_t* first){
 
 	uint64 noOfBBs = 0;
 	for(int i=0;i<first->noOfModules;i++){
 		noOfBBs += first->module[i].addresses.size();
 	}
-	
+
 	cout << first->noOfBasicBlocks << " " << noOfBBs << endl;
-	
+
 }
 
 //checks for unique modules in first file (compared with the second file)
 void checkModules (returnParse_t* first,returnParse_t* second){
-	
+
 	for(int i=0;i<first->noOfModules;i++){
 		string firstName = first->module[i].name;
 		bool found = 0;
@@ -92,30 +92,30 @@ void checkDuplicates(returnParse_t* first){
 
 
 void searchAndReport(returnParse_t* first, returnParse_t* second, returnParse_t* report, string exec){
-  
+
   uint64 matched = 0;
   uint64 notMatched = 0;
   uint64 notInModule = 0;
-  
+
   modules_t* reportModule = report->module;
   unsigned int currentModule = 0;
-  
-  
+
+
   //get the number of modules that match
 
   //things in first and not in second
   for(int i=0;i<first->noOfModules;i++){
-  
+
 	unsigned int printName = 1;
 
 	//check if this is a duplicate
 	if(first->locateOriginals[i] != -1){  //duplicate - accounted for all in the original
 		continue;
 	}
-  
+
     string firstName = first->module[i].name;
     int secondIndex = -1;
-    
+
 	//filter out modules that are not part of the exec
     if(firstName.find(exec) == string::npos){
       continue;
@@ -129,7 +129,7 @@ void searchAndReport(returnParse_t* first, returnParse_t* second, returnParse_t*
 		break;
       }
     }
-	
+
 	if(secondIndex == -1){
 		notInModule++;
 		cout << "not matched -> " <<  firstName << endl;
@@ -151,12 +151,12 @@ void searchAndReport(returnParse_t* first, returnParse_t* second, returnParse_t*
 					printName = 0;
 					currentModule++;
 					reportModule[currentModule-1].name = firstName;
-				}		
+				}
 				reportModule[currentModule-1].addresses.push_back(firstAdd[j]);
 			}
 			else{
 			  matched++;
-			}  
+			}
 		}
 	}
     else{
@@ -173,13 +173,13 @@ void searchAndReport(returnParse_t* first, returnParse_t* second, returnParse_t*
     }
 
   }
-  
+
   report->noOfModules = currentModule;
 
   cout << "summary : " << endl;
-  cout << matched << " " << notMatched << endl; 
+  cout << matched << " " << notMatched << endl;
   cout << notInModule << endl;
-  
+
 }
 
 string getModule (const char*  line){
@@ -191,18 +191,18 @@ string getModule (const char*  line){
 }
 
 unsigned int fillBBdata (returnParse_t* returnVal,const char* line,int maxModules){
-  
+
   unsigned int moduleNumber,size;
   uint64 startAddress;
   modules_t* modules = returnVal->module;
-  
+
   if(sscanf(line,"module[%u]: %llx,%u",&moduleNumber,&startAddress,&size)!=3){
 	cout << "assert failed" << endl;
   }
-  if(moduleNumber >= maxModules){ 
+  if(moduleNumber >= maxModules){
     return moduleNumber;
   }
-  
+
   uint64 place;
   if(find(returnVal->duplicateIndexes.begin(),returnVal->duplicateIndexes.end(),moduleNumber) == returnVal->duplicateIndexes.end()){ //not duplicate
 	place = moduleNumber;
@@ -210,12 +210,12 @@ unsigned int fillBBdata (returnParse_t* returnVal,const char* line,int maxModule
   else{  //duplicates
 	place = returnVal->locateOriginals[moduleNumber];
   }
-  
+
   modules[place].addresses.push_back(startAddress);
 
   return place;
-  
-} 
+
+}
 
 //remove duplicate entries
 void removeDuplicates(returnParse_t* first){
@@ -230,14 +230,26 @@ void removeDuplicates(returnParse_t* first){
 }
 
 
-//need a function to parse the a file and return a data structure 
+//need a function to parse the a file and return a data structure
 returnParse_t* parseFiles(ifstream &file){
-  
+
   string line;
+  char drcovVersion = 0;
 
   //DRCOV first line
   getline(file,line);
- 
+
+  //DRCOV version
+  drcovVersion = line.back();
+	cout << "drcov version : " << drcovVersion << endl;
+
+  // From version 2 DRCOV also has flavour
+  if (drcovVersion == '2')
+	{
+		getline(file, line); // Discard flavour line
+		cout << line << endl;
+	}
+
   //need to get the number of modules
   getline(file,line,' ');
   getline(file,line,' ');
@@ -245,19 +257,19 @@ returnParse_t* parseFiles(ifstream &file){
 
   uint64 noOfModules = atoi(line.c_str());
   cout << "modules : " << noOfModules << endl;
- 
+
   modules_t* modules = new modules_t[noOfModules + 1]; //noOfModules + space for dynamically generated code (later)
-  
+
   returnParse_t* returnVal = new returnParse_t;
   returnVal->noOfModules = noOfModules;
   returnVal->module = modules;
   returnVal->locateOriginals = new uint64[noOfModules + 1];
-  
+
   //initialize locate originals to -1
   for(int i=0;i<noOfModules + 1;i++){
 	returnVal->locateOriginals[i] = -1;
   }
-  
+
   for(uint64 i=0; i<noOfModules; i++){
     getline(file,line);
     string moduleName = getModule(line.c_str());
@@ -271,39 +283,39 @@ returnParse_t* parseFiles(ifstream &file){
 		}
 	}
   }
-  
+
   cout << "duplicate modules: " << returnVal->duplicateIndexes.size() << endl;
 
   //get the bb count
   getline(file,line,' ');
   getline(file,line,' ');
   getline(file,line,' ');
-  
-  uint64 noOfBasicBlocks = atoi(line.c_str()); 
+
+  uint64 noOfBasicBlocks = atoi(line.c_str());
   cout << "basicblocks : " << noOfBasicBlocks << endl;
-  
+
   returnVal->noOfBasicBlocks = noOfBasicBlocks;
 
   getline(file,line);
   getline(file,line);
-  
+
   //for counting invalid modules
   uint64 invalidModules = 0;
 
   for(uint64 i=0;i<noOfBasicBlocks;i++){
-    
+
 	unsigned int number;
-	
+
 	getline(file,line);
     number = fillBBdata(returnVal,line.c_str(),noOfModules);
 	if(number>=noOfModules){
 		invalidModules++;
 	}
   }
-  
+
   cout << "invalid bbs : " << invalidModules << endl;
   cout << "valid bbs :" << noOfBasicBlocks - invalidModules << endl;
-  
+
 
   return returnVal;
 
@@ -367,36 +379,36 @@ int main(int argc, char ** argv){
 
   //first should be the one having more bbs - (first - second)
   ifstream first_file, second_file;
-  
+
   first_file.open(first_filename.c_str());
   second_file.open(second_filename.c_str());
-  
+
   returnParse_t* first_data = parseFiles(first_file);
   returnParse_t* second_data = parseFiles(second_file);
-  
+
   cout << "before duplicate bb removal :" << endl;
   checkStructure(first_data);
   checkStructure(second_data);
-  
+
   removeDuplicates(first_data);
   removeDuplicates(second_data);
-  
+
   cout << "after duplicate bb removal :" << endl;
   checkStructure(first_data);
   checkStructure(second_data);
 
   //if possible use the file with the highest bbs first
   //search and if there is a difference, then dump it
-  
+
   ofstream outFile;
   outFile.open(output_filename.c_str());
-  
-  
+
+
   returnParse_t* dataReported = new returnParse_t;
   dataReported->module = new modules_t[first_data->noOfModules];
 
   searchAndReport(first_data,second_data,dataReported,exec);
-  
+
   printToFile(outFile,dataReported);
 
   outFile.close();
