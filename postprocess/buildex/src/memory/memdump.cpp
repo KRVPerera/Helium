@@ -391,7 +391,7 @@ vector<mem_regions_t *> get_image_regions_from_dump(vector<string> filenames, st
 			
 		}
 	}
-	if (similar) DEBUG_PRINT(("the two images are not similar\n"), 2);
+	if (similar) DEBUG_PRINT(("the two images similar\n"), 2);
 	
 	for (int i = 0; i < filenames.size(); i++){
 
