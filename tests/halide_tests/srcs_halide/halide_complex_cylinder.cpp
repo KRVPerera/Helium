@@ -1,6 +1,8 @@
 #include "Halide.h"
 using namespace Halide;
 
+// Ref : http://www.cescg.org/CESCG97/boros/
+
 int main(int argc, char **argv) {
     //TODO : 45 degrees angle of images gets a error, cpp code works for the similar code
     ImageParam input(UInt(8), 2);
