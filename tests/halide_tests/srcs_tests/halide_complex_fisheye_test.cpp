@@ -3,28 +3,31 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <string>
+#include <exception>
 
 #include "image_manipulation.h"
-
+using namespace std;
 extern "C" {
-#include "halide_complex_fisheye_gen.h"
+#include "halide_complex_twirl_gen.h"
 }
-//"F:\\FYP2\\Test\\SundayMeeting\\images\\a.png"
-//"F:\\FYP2\\Test\\SundayMeeting\\images\\out.png"
-//"C:\\Users\\FYP\\Downloads\\SundayMeeting\\a.png"
-//"C:\\Users\\FYP\\Downloads\\SundayMeeting\\out.png"
+
+Image<uint8_t> halide_function(Image<uint8_t> in) {
+
+	Image<uint8_t> out(in.width(), in.height());
+
+	halide_complex_twirl_gen(in, out);
+
+	return out;
+}
+
 int main(int argc, char **argv) {
 
 	ULONG_PTR token = initialize_image_subsystem();
-	char value = getchar();
-	
-	Image<uint8_t> input = load_image<uint8_t>("C:\\Users\\FYP\\Downloads\\SundayMeeting\\images\\a.png");
-	Image<uint8_t> output(input.width() - 2, input.height() - 2);
-
-	if (value == 'a'){
-		halide_complex_fisheye_gen(input, output);
-	}
-	save_image<uint8_t>("C:\\Users\\FYP\\Downloads\\SundayMeeting\\images\\out.png", output);
+    
+    string name(argv[1]);
+	Image<uint8_t> input = load_image<uint8_t>(argv[1]);
+	Image<uint8_t> output = halide_function(input);
+	save_image<uint8_t>(argv[2], output);
 	shutdown_image_subsystem(token);
 
 	return 0;
