@@ -8,14 +8,14 @@
 #include "image_manipulation.h"
 using namespace std;
 extern "C" {
-#include "halide_complex_twirl_gen.h"
+#include "halide_complex_fisheye_gen.h"
 }
 
 Image<uint8_t> halide_function(Image<uint8_t> in) {
 
 	Image<uint8_t> out(in.width(), in.height());
 
-	halide_complex_twirl_gen(in, out);
+	halide_complex_fisheye_gen(in, out);
 
 	return out;
 }
