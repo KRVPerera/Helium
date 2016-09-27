@@ -5,14 +5,14 @@
 
 if "%1" == "help" (
 	echo {folder} - folder in which DynamoRIO will reside 
-	echo {dr_folder_name} - sub folder within {folder} in which DynamoRIO should reside (The default is {folder}/dynamorio).
+	echo {dr_folder_name} - sub folder within {folder} in which DynamoRIO should reside {The default is {folder}/dynamorio}
 	exit /b
 )
 
 set CURRENT_DIR=%CD%
 
 if "%1" == "" (
-	echo please give out library directory..
+	echo please give out library directory
 	exit /b
 )
 
@@ -24,7 +24,7 @@ if "%2" == "" (
 if NOT EXIST %DR_HOME%\NUL (
 	mkdir %DR_HOME%
 	cd %DR_HOME%
-	svn co -r2773 http://dynamorio.googlecode.com/svn/trunk/ .
+	git clone https://github.com/DynamoRIO/dynamorio.git
 )
 
 :: setting up dynamorio environment variables
@@ -38,16 +38,18 @@ setx DYNAMORIO_HOME %DR_HOME%
 call "C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\vcvars32.bat"
 cd %DR_HOME%
 
-:: update svn
-svn up -r2773
+set DR_DIR="..\dynamorio"
+
+:: update git
+git pull
 
 :: building 32 bit debug 
 if NOT EXIST build_debug_32\NUL mkdir build_debug_32
 cd build_debug_32
-cmake -G"Visual Studio 12" .. -DDEBUG=ON
+cmake -G"Visual Studio 12" %DR_DIR% -DDEBUG=ON
 cmake --build . --config Debug --target install
 
-cmake -G"Visual Studio 12" .. -DDEBUG=ON
+cmake -G"Visual Studio 12" %DR_DIR% -DDEBUG=ON
 cmake --build . --config Debug
 echo debug_32_done 1>&2
 cd %DR_HOME%
@@ -55,10 +57,10 @@ cd %DR_HOME%
 :: building 32 bit release + install
 if NOT EXIST build_release_32\NUL mkdir build_release_32
 cd build_release_32
-cmake -G"Visual Studio 12" ..
+cmake -G"Visual Studio 12" %DR_DIR%
 cmake --build . --config RelWithDebInfo --target install
 
-cmake -G"Visual Studio 12" ..
+cmake -G"Visual Studio 12" %DR_DIR%
 cmake --build . --config RelWithDebInfo
 echo release_32_done 1>&2
 
@@ -69,10 +71,10 @@ cd %DR_HOME%
 :: building 64 bit debug 
 if NOT EXIST build_debug_64\NUL mkdir build_debug_64
 cd build_debug_64
-cmake -G"Visual Studio 12 Win64" .. -DDEBUG=ON
+cmake -G"Visual Studio 12 Win64" %DR_DIR% -DDEBUG=ON
 cmake --build . --config Debug --target install
 
-cmake -G"Visual Studio 12 Win64" .. -DDEBUG=ON
+cmake -G"Visual Studio 12 Win64" %DR_DIR% -DDEBUG=ON
 cmake --build . --config Debug
 echo debug_64_done 1>&2
 cd %DR_HOME%
@@ -80,10 +82,10 @@ cd %DR_HOME%
 :: building 32 bit release + install
 if NOT EXIST build_release_64\NUL mkdir build_release_64
 cd build_release_64
-cmake -G"Visual Studio 12 Win64" ..
+cmake -G"Visual Studio 12 Win64" %DR_DIR%
 cmake --build . --config RelWithDebInfo --target install
 
-cmake -G"Visual Studio 12 Win64" ..
+cmake -G"Visual Studio 12 Win64" %DR_DIR%
 cmake --build . --config RelWithDebInfo
 echo release_64_done 1>&2
 
