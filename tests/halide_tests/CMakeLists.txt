@@ -158,6 +158,11 @@ build_app(halide_bilateral)
 #misc for testing things out
 build_app(halide_misc)
 
+#complex filters
+build_app(halide_complex_twirl)
+build_app(halide_complex_cylinder)
+build_app(halide_complex_fisheye)
+
 ####################JIT compiled for debugging and testing#################################
 build_jit(halide_heq)
 build_jit(halide_bilateral)
