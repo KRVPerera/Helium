@@ -3,9 +3,9 @@ project(halide_tests)
 cmake_minimum_required(VERSION 2.8)
 
 function(halide_project name library)
-  
+
   message("ARGS\n ${ARGN}")
-  
+
   add_executable("${name}" ${ARGN})
   target_link_libraries("${name}" ${library} Gdiplus.lib)
   if (WIN32)
@@ -74,7 +74,7 @@ macro(build_app name)
 	#set the cmake build output directory for intermediate filters
 	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/output_halide_${TYPE})
 	change_config()
-	
+
 	#halide filter build
 	#builds the target for compiling the code and then running the output / also copies the Halide libraries
 	halide_project(${name} ${HALIDE} "${HALIDE_FILTER_DIRECTORY}/${name}.cpp")
@@ -85,17 +85,17 @@ macro(build_app name)
 				   COMMAND cd ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
 				   COMMAND ${name}
                    COMMENT "Building ${name}...")
-	
+
 	# add_custom_command(OUTPUT "${CMAKE_SOURCE_DIR}/output_halide_${TYPE}/${name}_gen.o"
                    # COMMAND cd ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
 				   # COMMAND ${name}
 				   # DEPENDS ${name}.cpp
                    # COMMENT "Building ${name}...")
-	
+
 	#halide app build
 	include_directories(${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 	link_directories(${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
-	
+
 	if( CMAKE_SIZEOF_VOID_P EQUAL 8 )
 		file(MAKE_DIRECTORY "${CMAKE_SOURCE_DIR}/bin64")
 		set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin64")
@@ -103,19 +103,19 @@ macro(build_app name)
 		file(MAKE_DIRECTORY "${CMAKE_SOURCE_DIR}/bin32")
 		set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin32")
 	endif( CMAKE_SIZEOF_VOID_P EQUAL 8 )
-	
+
 	#set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/output_tests_${TYPE})
-	
+
 	change_config()
 
 	if(FIRST)
 		halide_project(${name}_test ${HALIDE} "${HALIDE_TEST_DIRECTORY}/${name}_test.cpp" ${ARGN})
 	else()
-		halide_project(${name}_test ${HALIDE} "${HALIDE_TEST_DIRECTORY}/${name}_test.cpp" "${CMAKE_SOURCE_DIR}/output_halide_${TYPE}/${name}_gen.o" ${ARGN})
+		halide_project(${name}_test ${HALIDE} "${HALIDE_TEST_DIRECTORY}/${name}_test.cpp" "${CMAKE_SOURCE_DIR}/output_halide_${TYPE}/${name}_gen.lib" ${ARGN})
 	endif()
-	
+
 	#add_dependencies(${name}_test ${name})
-	
+
 endmacro(build_app)
 
 
@@ -128,9 +128,9 @@ macro(build_jit name)
 		file(MAKE_DIRECTORY "${CMAKE_SOURCE_DIR}/bin32")
 		set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin32")
 	endif( CMAKE_SIZEOF_VOID_P EQUAL 8 )
-	
+
 	#set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/output_tests_${TYPE})
-	
+
 	change_config()
 
 	halide_project(${name}_jit ${HALIDE} "${HALIDE_TEST_DIRECTORY}/${name}_jit.cpp" ${ARGN})
@@ -153,7 +153,7 @@ build_app(halide_weights)  #not implemented
 #indirection
 build_app(halide_heq)
 build_app(halide_warp) #not implemented
-build_app(halide_bilateral)  
+build_app(halide_bilateral)
 
 #misc for testing things out
 build_app(halide_misc)
@@ -172,4 +172,3 @@ build_jit(halide_misc)
 
 
 message("generation successful!")
-  
