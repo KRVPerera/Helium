@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <string>
 #include <iostream>
+#include <vector>
 
 using namespace std;
 using namespace Halide;
@@ -95,7 +96,8 @@ int main(int argc, char **argv) {
 	Func output("output");
 	output(x, y) = cast<uint8_t>(255.0 * bilateral_grid(x, y));
 
-	output.compile_to_file("halide_bilateral_gen", input_image);
+	std::vector<Argument> args = {input_image};
+	output.compile_to_static_library("halide_bilateral_gen", args);
 
 	return 0;
 

@@ -1,4 +1,5 @@
 #include <Halide.h>
+#include <vector>
 using namespace Halide;
 
 int main(int argc, char **argv) {
@@ -11,7 +12,8 @@ int main(int argc, char **argv) {
 
 	// The algorithm
 	output(x, y) = input(x / scale, y / scale);
-	output.compile_to_file("halide_snakes_gen", input);
+	std::vector<Argument> args = {input};
+	output.compile_to_static_library("halide_snakes_gen", args);
 
 	return 0;
 }

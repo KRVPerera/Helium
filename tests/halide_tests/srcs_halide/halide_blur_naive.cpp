@@ -17,9 +17,9 @@ int main(){
 	output(x, y) = cast<uint8_t>((clamped(x - 1, y - 1) + clamped(x, y - 1) + clamped(x + 1, y - 1)
 		+ clamped(x - 1, y) + clamped(x, y) + clamped(x + 1, y)
 		+ clamped(x - 1, y + 1) + clamped(x, y + 1) + clamped(x + 1, y + 1)) / 9);
-	
-	output.compile_to_file("halide_blur_naive_gen", input);
-	
+
+	std::vector<Argument> args = {input};
+	output.compile_to_static_library("halide_blur_naive_gen", args);
+
 	return 0;
 }
-

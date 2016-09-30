@@ -9,25 +9,25 @@ using namespace Halide;
 int main(int argc, char **argv) {
 
 	ImageParam input(UInt(8), 2);
-	
+
 	Func blur_x("blur_x"), blur_y("blur_y");
 	Var x("x"), y("y"), xi("xi"), yi("yi"), xo("xo"), yo("yo");
 	Var x_outer, y_outer, x_inner, y_inner, tile_index;
-	
+
 
 	// The algorithm
-	
+
 	//1. one buffer
 	/*blur_y(x, y) = cast<uint8_t>((cast<uint16_t>(input(x, y)) + cast<uint16_t>(input(x + 1, y)) + cast<uint16_t>(input(x + 2, y)) +
 	cast<uint16_t>(input(x, y + 1)) + cast<uint16_t>(input(x + 1, y + 1)) + cast<uint16_t>(input(x + 2, y + 1)) +
 	cast<uint16_t>(input(x, y + 2)) + cast<uint16_t>(input(x + 1, y + 2)) + cast<uint16_t>(input(x + 2, y + 2))) / 9);
 	*/
-	
+
 	//2. two buffers
 	blur_x(x, y) = (cast<uint16_t>(input(x, y)) + cast<uint16_t>(input(x + 1, y)) + cast<uint16_t>(input(x + 2, y))) / 3;
 	blur_y(x, y) = cast<uint8_t>((blur_x(x, y) + blur_x(x, y + 1) + blur_x(x, y + 2)) / 3);
 
-	
+
 
 	// How to schedule it
 	//blur_y.split(y, y, yi, 8).parallel(y).vectorize(x, 8);
@@ -40,7 +40,7 @@ int main(int argc, char **argv) {
 
 	//blur_y.vectorize(x, 8);
 
-	
+
 	//blur_y.split(y, y, yi, 2);
 	//blur_x.store_at(blur_y, y).compute_at(blur_y, yi);
 	//blur_y.unroll(x, 2);
@@ -49,8 +49,8 @@ int main(int argc, char **argv) {
 	//blur_y.fuse(x_outer, y_outer, tile_index);
 	//blur_y.parallel(tile_index);
 
-	
-	blur_y.compile_to_file("halide_blur_hvscan_gen", input);
+	std::vector<Argument> args = {input};
+	blur_y.compile_to_static_library("halide_blur_hvscan_gen", args);
 
 	//7. threshold
 	/*Var x_0;
@@ -100,10 +100,10 @@ int main(int argc, char **argv) {
 
 	Func output;
 
-	output(x, y) = cast<uint8_t>(clamp((-cast<int32_t>(input(x, y)) - cast<int32_t>(input(x + 1, y)) - cast<int32_t>(input(x + 2, y)) 
-		- cast<int32_t>(input(x, y + 1)) - cast<int32_t>(input(x + 2, y + 1)) - cast<int32_t>(input(x + 2, y + 2)) 
-		- cast<int32_t>(input(x + 1, y + 2)) - cast<int32_t>(input(x, y + 2)) 
-		+ 8 * cast<int32_t>(input(x + 1, y + 1))), 0, 255)); 
+	output(x, y) = cast<uint8_t>(clamp((-cast<int32_t>(input(x, y)) - cast<int32_t>(input(x + 1, y)) - cast<int32_t>(input(x + 2, y))
+		- cast<int32_t>(input(x, y + 1)) - cast<int32_t>(input(x + 2, y + 1)) - cast<int32_t>(input(x + 2, y + 2))
+		- cast<int32_t>(input(x + 1, y + 2)) - cast<int32_t>(input(x, y + 2))
+		+ 8 * cast<int32_t>(input(x + 1, y + 1))), 0, 255));
 
 	//output(x, y) = cast<uint8_t>((cast<uint16_t>(input(x, y)) + cast<uint16_t>(input(x + 1, y + 1)) + cast<uint16_t>(input(x + 2, y + 2))) / 3);
 
@@ -121,4 +121,3 @@ int main(int argc, char **argv) {
 
 
 }
-

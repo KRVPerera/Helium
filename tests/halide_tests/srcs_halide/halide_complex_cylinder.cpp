@@ -1,10 +1,11 @@
 #include "Halide.h"
+#include <vector>
+
 using namespace Halide;
 
 // Ref : http://www.cescg.org/CESCG97/boros/
 
 int main(int argc, char **argv) {
-    //TODO : 45 degrees angle of images gets a error, cpp code works for the similar code
     ImageParam input(UInt(8), 2);
 
     Func output("output");
@@ -34,8 +35,9 @@ int main(int argc, char **argv) {
 		cast<uint8_t>(newX),
 		cast<uint8_t>(newY)
 		));
-    
-    output.compile_to_file("halide_complex_cylinder_gen", input);
-  
+
+    std::vector<Argument> args = {input};
+    output.compile_to_static_library("halide_complex_cylinder_gen", args);
+
     return 0;
 }

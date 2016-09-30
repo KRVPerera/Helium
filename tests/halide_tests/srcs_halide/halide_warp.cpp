@@ -1,4 +1,5 @@
 #include <Halide.h>
+#include <vector>
 using namespace Halide;
 #include <math.h>
 
@@ -28,7 +29,8 @@ int main(int argc, char **argv){
 	//hist.trace_stores();
 
 	output(x, y) = cast<uint8_t>((255 * hist(input(x, y))) / n);
-	output.compile_to_file("halide_warp_gen", input);
+	std::vector<Argument> args = {input};
+	output.compile_to_static_library("halide_warp_gen", args);
 	output.compile_to_lowered_stmt("hist.txt");
 
 }

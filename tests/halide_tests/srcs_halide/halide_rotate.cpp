@@ -32,9 +32,9 @@ int main(int argc, char **argv) {
 	Func output_1;
 	Expr val = (((((cast<double>(input_3(x_0, x_1 + 1, x_2 + 1)) - (cast<double>(((cast<double>(input_3(x_0, x_1 + 1, x_2 + 2)) - (0 + (8 * cast<double>(input_3(x_0, x_1 + 1, x_2 + 1))) + 0)) + cast<double>(input_3(x_0, x_1 + 2, x_2 + 2)) + cast<double>(input_3(x_0, x_1, x_2 + 2)) + cast<double>(input_3(x_0, x_1 + 2, x_2 + 1)) + cast<double>(input_3(x_0, x_1, x_2 + 1)) + cast<double>(input_3(x_0, x_1 + 2, x_2)) + cast<double>(input_3(x_0, x_1 + 1, x_2)) + cast<double>(input_3(x_0, x_1, x_2)))) * cast<double>(p_1) * cast<double>(input_2)))))));
 	//output_1(x_0, x_1, x_2) = cast<uint8_t>(((((cast<double>(input_3(x_0, x_1 + 1, x_2 + 1)) - (cast<double>(((cast<double>(input_3(x_0, x_1 + 1, x_2 + 2)) - (0 + (8 * cast<double>(input_3(x_0, x_1 + 1, x_2 + 1))) + 0)) + cast<double>(input_3(x_0, x_1 + 2, x_2 + 2)) + cast<double>(input_3(x_0, x_1, x_2 + 2)) + cast<double>(input_3(x_0, x_1 + 2, x_2 + 1)) + cast<double>(input_3(x_0, x_1, x_2 + 1)) + cast<double>(input_3(x_0, x_1 + 2, x_2)) + cast<double>(input_3(x_0, x_1 + 1, x_2)) + cast<double>(input_3(x_0, x_1, x_2)))) * cast<double>(p_1) * cast<double>(input_2)))))));
-	
+
 	output_1(x_0, x_1, x_2) = cast<uint8_t>(clamp(val,0,255));
-	
+
 	vector<Argument> args;
 	args.push_back(p_1);
 	args.push_back(input_2);
@@ -48,8 +48,8 @@ int main(int argc, char **argv) {
 		.reorder_storage(x_0, x_1, x_2)
 		.parallel(x_2)
 		.compute_root()
-		; 
-	
+		;
+
 
 	/*Halide::Var _x_22;
 output_1
@@ -60,7 +60,7 @@ output_1
 .compute_root()
 ;*/
 
-    output_1.compile_to_file("halide_rotate_gen", args); 
+    output_1.compile_to_static_library("halide_rotate_gen", args);
 
 
     return 0;
